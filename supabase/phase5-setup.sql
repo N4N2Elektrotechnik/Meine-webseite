@@ -96,3 +96,22 @@ create or replace view public.approved_reviews as
   where status = 'approved';
 
 grant select on public.approved_reviews to anon, authenticated;
+
+-- ============================================================
+-- 3. Nachtrag: Basis-GRANTs für contact_messages und reviews
+-- ============================================================
+-- RLS-Policies allein reichen nicht: Ohne eine SQL-GRANT-Berechtigung auf
+-- der Tabelle weist Postgres eine Anfrage schon VOR der RLS-Prüfung mit
+-- "permission denied for table ..." ab. Die folgenden GRANTs geben genau
+-- den Rollen genau die Rechte, die die Policies oben ohnehin vorsehen:
+-- anon darf weiterhin nur einfügen (contact_messages_insert_public /
+-- reviews_insert_public greifen weiterhin als zusätzliche Einschränkung,
+-- z. B. status = 'pending' bei reviews), authenticated (= eingeloggter
+-- Admin) darf zusätzlich lesen/aktualisieren/löschen — ebenfalls weiterhin
+-- begrenzt durch die bestehenden *_admin-Policies. RLS bleibt in beiden
+-- Tabellen aktiviert; an den Policies selbst ändert sich nichts.
+grant insert on public.contact_messages to anon, authenticated;
+grant select, update, delete on public.contact_messages to authenticated;
+
+grant insert on public.reviews to anon, authenticated;
+grant select, update, delete on public.reviews to authenticated;
