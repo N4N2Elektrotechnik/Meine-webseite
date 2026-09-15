@@ -42,3 +42,35 @@ export function LogoBadge({
     </span>
   );
 }
+
+/**
+ * Header-Variante: gleicher Bildinhalt wie n4n2-logo-compact.jpg (identisches
+ * Design/Farben/Schrift, 1:1 aus dem Original public/images/n4n2-logo.png
+ * ausgeschnitten), aber als public/images/n4n2-logo-header.png mit echter
+ * Transparenz statt hellem Kasten — dadurch kein separater
+ * Hintergrund-Hack nötig.
+ */
+export function LogoBadgeTransparent({
+  imageHeightClass = "h-10",
+  priority = false,
+  className = "",
+}: {
+  imageHeightClass?: string;
+  priority?: boolean;
+  className?: string;
+}) {
+  return (
+    <span
+      className={`relative inline-flex w-fit shrink-0 items-center justify-center ${className}`}
+    >
+      <Image
+        src="/images/n4n2-logo-header.png"
+        alt={`${company.name} Logo`}
+        width={1237}
+        height={392}
+        className={`${imageHeightClass} w-auto`}
+        priority={priority}
+      />
+    </span>
+  );
+}

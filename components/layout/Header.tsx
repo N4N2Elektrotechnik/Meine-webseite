@@ -2,7 +2,7 @@
 
 import type { MouseEvent } from "react";
 import Link from "next/link";
-import { LogoBadge } from "@/components/brand/LogoBadge";
+import { LogoBadgeTransparent } from "@/components/brand/LogoBadge";
 import { PhoneIcon } from "@/components/icons/ContactIcons";
 import { company, contactLinks } from "@/lib/placeholder-data";
 
@@ -36,7 +36,7 @@ export function Header() {
     <header className="sticky top-0 z-50 border-b border-paper/10 bg-navy-strong/80 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4 sm:px-10">
         <Link href="/" aria-label="Zum Seitenanfang">
-          <LogoBadge imageHeightClass="h-9 sm:h-10" padding="p-2" priority />
+          <LogoBadgeTransparent imageHeightClass="h-8 sm:h-10" priority />
         </Link>
         <nav aria-label="Hauptnavigation" className="hidden items-center gap-8 md:flex">
           {navItems.map((item) => (
