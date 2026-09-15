@@ -86,6 +86,14 @@ export function Contact({ status }: { status?: string }) {
           action={submitContactMessage}
           className="relative rounded-2xl border border-paper/15 bg-paper/[0.04] p-8 backdrop-blur-sm sm:p-10"
         >
+          <input
+            type="text"
+            name="website"
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            className="absolute left-[-9999px] top-auto h-px w-px overflow-hidden"
+          />
           {status === "success" ? (
             <p className="mb-6 rounded-lg border border-gold/40 bg-gold/10 px-4 py-3 text-sm text-gold">
               Danke für Ihre Nachricht! Wir melden uns zeitnah zurück.
