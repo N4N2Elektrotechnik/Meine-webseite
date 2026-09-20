@@ -34,8 +34,9 @@ const VIEWPORT_ANCHOR = 0.45;
 export function CableCanvas() {
   const svgRef = useRef<SVGSVGElement>(null);
   const basePathRef = useRef<SVGPathElement>(null);
+  const haloPathRef = useRef<SVGPathElement>(null);
   const drawPathRef = useRef<SVGPathElement>(null);
-  const sparkRef = useRef<SVGCircleElement>(null);
+  const sparkRef = useRef<SVGGElement>(null);
   const gradientId = useId();
   const glowId = useId();
 
@@ -43,13 +44,31 @@ export function CableCanvas() {
     const svg = svgRef.current;
     const basePath = basePathRef.current;
     const drawPath = drawPathRef.current;
+    const haloPath = haloPathRef.current;
     const spark = sparkRef.current;
     const container = svg?.parentElement;
-    if (!svg || !basePath || !drawPath || !container) return;
+    if (!svg || !basePath || !drawPath || !haloPath || !container) return;
 
     const reduceMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
+
+    // Schwache Geräte (≤4 Kerne, ≤4 GB RAM, Datensparmodus): Glow-Strich weglassen.
+    const hints = navigator as Navigator & {
+      deviceMemory?: number;
+      connection?: { saveData?: boolean };
+    };
+    const lite =
+      (hints.hardwareConcurrency ?? 8) <= 4 ||
+      (hints.deviceMemory ?? 8) <= 4 ||
+      hints.connection?.saveData === true;
+    if (lite) haloPath.style.display = "none";
+
+    // Beim Aufbau gecacht, damit im Scroll-Frame KEINE DOM-Messung nötig ist
+    // (getBoundingClientRect/innerHeight erzwingen sonst Layout pro Frame).
+    let containerTop = 0;
+    let viewportHeight = 0;
+    let lastLength = -1;
 
     let cumulativeLengths: number[] = [];
     let totalLength = 0;
@@ -84,6 +103,9 @@ export function CableCanvas() {
       const containerRect = container!.getBoundingClientRect();
       const width = container!.clientWidth;
       const height = container!.scrollHeight;
+      containerTop = containerRect.top + window.scrollY;
+      viewportHeight = window.innerHeight;
+      lastLength = -1;
 
       const points = nodes.map((node) => {
         const r = node.getBoundingClientRect();
@@ -112,6 +134,7 @@ export function CableCanvas() {
       const d = segments.join(" ");
       basePath!.setAttribute("d", d);
       drawPath!.setAttribute("d", d);
+      haloPath!.setAttribute("d", d);
 
       totalLength = drawPath!.getTotalLength();
       pathStartY = points[0].y;
@@ -144,15 +167,19 @@ export function CableCanvas() {
       }
 
       if (reduceMotion) {
-        drawPath!.style.strokeDasharray = "none";
-        drawPath!.style.strokeDashoffset = "0";
+        for (const el of [drawPath!, haloPath!]) {
+          el.style.strokeDasharray = "none";
+          el.style.strokeDashoffset = "0";
+        }
         nodes.forEach((node) => {
           node.dataset.cableActive = "true";
         });
         if (spark) spark.style.opacity = "0";
       } else {
-        drawPath!.style.strokeDasharray = `${totalLength}`;
-        drawPath!.style.strokeDashoffset = `${totalLength}`;
+        for (const el of [drawPath!, haloPath!]) {
+          el.style.strokeDasharray = `${totalLength}`;
+          el.style.strokeDashoffset = `${totalLength}`;
+        }
       }
     }
 
@@ -181,13 +208,13 @@ export function CableCanvas() {
       foundY = targetY;
     }
 
-    function update() {
+    function update(scrollY: number) {
       if (totalLength <= 0) return;
 
-      const containerRect = container!.getBoundingClientRect();
       // Dokument-Y der Viewport-Ankerlinie, im selben Koordinatensystem
-      // wie der Pfad (relativ zur linken/oberen Ecke von <main>).
-      const anchorDocY = -containerRect.top + window.innerHeight * VIEWPORT_ANCHOR;
+      // wie der Pfad (relativ zur linken/oberen Ecke von <main>) — nur aus
+      // gecachten Werten und der ScrollTrigger-Scrollposition berechnet.
+      const anchorDocY = scrollY - containerTop + viewportHeight * VIEWPORT_ANCHOR;
 
       const last = tableY.length - 1;
       let targetLength: number;
@@ -204,11 +231,17 @@ export function CableCanvas() {
         targetLength = foundLen;
       }
 
-      drawPath!.style.strokeDashoffset = `${totalLength - targetLength}`;
+      // Keine identischen Updates (spart Style-Invalidierung und Neuzeichnen).
+      targetLength = Math.round(targetLength * 2) / 2;
+      if (targetLength === lastLength) return;
+      lastLength = targetLength;
+
+      const offset = `${totalLength - targetLength}`;
+      drawPath!.style.strokeDashoffset = offset;
+      haloPath!.style.strokeDashoffset = offset;
 
       if (spark) {
-        spark.setAttribute("cx", String(foundX));
-        spark.setAttribute("cy", String(foundY));
+        spark.setAttribute("transform", `translate(${foundX} ${foundY})`);
         spark.style.opacity = targetLength > 0.5 ? "1" : "0";
       }
 
@@ -229,10 +262,13 @@ export function CableCanvas() {
         trigger: container,
         start: "top bottom",
         end: "bottom top",
-        onUpdate: update,
-        onRefresh: update,
+        onUpdate: (self) => update(self.scroll()),
+        onRefresh: (self) => {
+          viewportHeight = window.innerHeight;
+          update(self.scroll());
+        },
       });
-      update();
+      update(st.scroll());
     }
 
     let resizeTimer: number;
@@ -263,15 +299,13 @@ export function CableCanvas() {
           <stop offset="0%" stopColor="var(--color-gold-strong)" />
           <stop offset="100%" stopColor="var(--color-gold)" />
         </linearGradient>
-        <filter id={glowId} x="-80%" y="-80%" width="260%" height="260%">
-          <feDropShadow
-            dx="0"
-            dy="0"
-            stdDeviation="2.5"
-            floodColor="#fbb400"
-            floodOpacity="0.4"
-          />
-        </filter>
+        {/* Glow des Funkens als Verlauf statt SVG-Filter (Filter auf der
+            seitenhohen Ebene kostete pro Scroll-Frame enorme Raster-Zeit). */}
+        <radialGradient id={glowId}>
+          <stop offset="0%" stopColor="#fbb400" stopOpacity="0.45" />
+          <stop offset="45%" stopColor="#fbb400" stopOpacity="0.28" />
+          <stop offset="100%" stopColor="#fbb400" stopOpacity="0" />
+        </radialGradient>
       </defs>
       <path
         ref={basePathRef}
@@ -281,20 +315,27 @@ export function CableCanvas() {
         strokeWidth="2"
         strokeLinecap="round"
       />
+      {/* Glow des Kabels: breiterer, transparenter Strich statt drop-shadow
+          (Breite/Deckkraft an den früheren Schatten σ=2,5 / 0,4 angenähert). */}
+      <path
+        ref={haloPathRef}
+        fill="none"
+        stroke="#fbb400"
+        strokeOpacity="0.09"
+        strokeWidth="7"
+        strokeLinecap="round"
+      />
       <path
         ref={drawPathRef}
         fill="none"
         stroke={`url(#${gradientId})`}
         strokeWidth="3"
         strokeLinecap="round"
-        filter={`url(#${glowId})`}
       />
-      <circle
-        ref={sparkRef}
-        r="5"
-        fill="var(--color-spark)"
-        style={{ opacity: 0, filter: `url(#${glowId})` }}
-      />
+      <g ref={sparkRef} style={{ opacity: 0 }}>
+        <circle r="11" fill={`url(#${glowId})`} />
+        <circle r="5" fill="var(--color-spark)" />
+      </g>
     </svg>
   );
 }
