@@ -25,7 +25,7 @@ export async function submitReview(formData: FormData) {
     rating < 1 ||
     rating > 5
   ) {
-    redirect("/?review=error#bewertungen");
+    redirect("/bewertungen?review=error");
   }
 
   const supabase = await createClient();
@@ -38,8 +38,8 @@ export async function submitReview(formData: FormData) {
 
   if (error) {
     console.error("Bewertungsformular: Fehler beim Speichern", error);
-    redirect("/?review=error#bewertungen");
+    redirect("/bewertungen?review=error");
   }
 
-  redirect("/?review=success#bewertungen");
+  redirect("/bewertungen?review=success");
 }

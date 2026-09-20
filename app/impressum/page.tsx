@@ -59,7 +59,7 @@ export default function ImpressumPage() {
             rows={[
               {
                 label: "Berufsbezeichnung",
-                value: `${company.profession} (verliehen in ${company.professionAwardedIn})`,
+                value: `${company.profession} (Meistertitel gemäß § 51 HwO; verliehen in ${company.professionAwardedIn})`,
               },
               {
                 label: "Zuständige Kammer",
@@ -87,43 +87,6 @@ export default function ImpressumPage() {
 
         <LegalSection title="Handelsregister">
           <p>Der Betrieb ist nicht im Handelsregister eingetragen.</p>
-        </LegalSection>
-
-        <LegalSection title="Verantwortlich für den Inhalt">
-          <p>gemäß § 18 Abs. 2 Medienstaatsvertrag (MStV):</p>
-          <LegalFields
-            rows={[
-              { label: "Name", value: company.owner },
-              {
-                label: "Anschrift",
-                value: (
-                  <>
-                    {company.street}, {company.postalCode} {company.city}
-                  </>
-                ),
-              },
-            ]}
-          />
-        </LegalSection>
-
-        <LegalSection title="EU-Streitschlichtung">
-          <p>
-            Die Europäische Kommission stellt eine Plattform zur
-            Online-Streitbeilegung (OS) bereit, abrufbar unter{" "}
-            <a
-              href="https://ec.europa.eu/consumers/odr/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              ec.europa.eu/consumers/odr
-            </a>
-            . Unsere E-Mail-Adresse finden Sie oben in diesem Impressum.
-          </p>
-          <p>
-            Wir sind nicht verpflichtet und nicht bereit, an
-            Streitbeilegungsverfahren vor einer
-            Verbraucherschlichtungsstelle teilzunehmen.
-          </p>
         </LegalSection>
 
         <LegalSection title="Haftung für Inhalte">

@@ -1,8 +1,23 @@
 import { ServiceIcon } from "@/components/icons/ServiceIcons";
 import { CableNode } from "@/components/cable/CableNode";
+import { TrailDot } from "@/components/cable/TrailDot";
 import type { Service } from "@/lib/placeholder-data";
 
-export function ServiceRow({ service, index }: { service: Service; index: number }) {
+/**
+ * `trail` (nur /leistungen): statt des CableNode-Knotens sitzt ein
+ * TrailDot in der Spaltenlücke (ab lg, wechselnd links/rechts der Mitte,
+ * dadurch "webt" das Kabel) bzw. im linken Seitenrand (mobil/Tablet) —
+ * so läuft das Kabel nie über Texte. Die Startseite nutzt weiter CableNode.
+ */
+export function ServiceRow({
+  service,
+  index,
+  trail = false,
+}: {
+  service: Service;
+  index: number;
+  trail?: boolean;
+}) {
   const reversed = index % 2 === 1;
   const side = reversed ? "right" : "left";
   // Fortlaufende Kabel-Nummerierung: Leitung 01 = Über uns, Leistungen folgen ab 02.
@@ -28,8 +43,26 @@ export function ServiceRow({ service, index }: { service: Service; index: number
         </div>
       </div>
 
-      <div className="lg:flex-1">
-        <CableNode side={side} label={`Leitung ${num}`} />
+      <div className={trail ? "relative lg:flex-1" : "lg:flex-1"}>
+        {trail ? (
+          <>
+            <TrailDot
+              className={`left-[-14px] top-1 -translate-x-1/2 lg:top-1/2 lg:-translate-y-1/2 ${
+                reversed
+                  ? "lg:left-auto lg:right-[-48px] lg:translate-x-1/2"
+                  : "lg:left-[-48px]"
+              }`}
+            />
+            <p
+              aria-hidden="true"
+              className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-muted"
+            >
+              Leitung {num}
+            </p>
+          </>
+        ) : (
+          <CableNode side={side} label={`Leitung ${num}`} />
+        )}
         <h3 className="mt-4 font-display text-3xl font-extrabold uppercase tracking-tight text-navy sm:text-4xl">
           {service.title}
         </h3>

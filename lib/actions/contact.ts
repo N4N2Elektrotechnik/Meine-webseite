@@ -68,7 +68,7 @@ export async function submitContactMessage(formData: FormData) {
   // stillschweigend verworfen, damit Bots daraus nichts lernen.
   const honeypot = String(formData.get("website") ?? "").trim();
   if (honeypot) {
-    redirect("/?contact=success#kontakt");
+    redirect("/kontakt?contact=success");
   }
 
   const name = String(formData.get("name") ?? "").trim();
@@ -78,7 +78,7 @@ export async function submitContactMessage(formData: FormData) {
   const privacyConsent = formData.get("privacyConsent");
 
   if (!name || !email || !message || !privacyConsent) {
-    redirect("/?contact=error#kontakt");
+    redirect("/kontakt?contact=error");
   }
 
   const supabase = await createClient();
@@ -91,10 +91,10 @@ export async function submitContactMessage(formData: FormData) {
 
   if (error) {
     console.error("Kontaktformular: Fehler beim Speichern", error);
-    redirect("/?contact=error#kontakt");
+    redirect("/kontakt?contact=error");
   }
 
   await notifyContactMessage({ name, email, phone, message });
 
-  redirect("/?contact=success#kontakt");
+  redirect("/kontakt?contact=success");
 }

@@ -27,7 +27,22 @@ export function Footer() {
         </div>
 
         <div className="grid grid-cols-2 gap-10 sm:flex sm:gap-16">
-          <div className="space-y-3">
+          <div className="space-y-2.5 font-mono text-xs uppercase tracking-[0.14em] text-paper/50">
+            <p className="text-paper/30">Seiten</p>
+            <Link href="/ueber-uns" className="block transition-colors hover:text-gold">
+              Über uns
+            </Link>
+            <Link href="/leistungen" className="block transition-colors hover:text-gold">
+              Leistungen
+            </Link>
+            <Link href="/bewertungen" className="block transition-colors hover:text-gold">
+              Bewertungen
+            </Link>
+            <Link href="/kontakt" className="block transition-colors hover:text-gold">
+              Kontakt
+            </Link>
+          </div>
+          <div className="order-last col-span-2 space-y-3 sm:order-none sm:col-span-1">
             <p className="font-mono text-xs uppercase tracking-[0.14em] text-paper/30">
               Kontakt
             </p>

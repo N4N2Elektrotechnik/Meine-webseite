@@ -24,11 +24,12 @@ export const company = {
   city: "München",
   country: "Deutschland",
   address: "Richard-Strauss-Straße 21, 81677 München",
-  profession: "Elektromeister",
+  // Wortlaut laut Meisterprüfungszeugnis (Handwerkskammer für München und
+  // Oberbayern): Meisterprüfung im Elektrotechniker-Handwerk, Meistertitel
+  // gemäß § 51 HwO. Keine freie Titel-Variante erfinden.
+  profession: "Meister im Elektrotechniker-Handwerk",
   professionAwardedIn: "Deutschland",
   chamber: "Handwerkskammer für München und Oberbayern",
-  // Pflichtangabe für ein künftiges Impressum, liegt noch nicht vor.
-  hours: "[Erreichbarkeit / Notdienstzeiten folgen]",
 };
 
 /** E-Mail/Telefon in link-fähiger Form, ohne Leerzeichen/Formatierung. */
@@ -39,15 +40,31 @@ export const contactLinks = {
   instagram: "https://instagram.com/n4n2_elektrotechnik",
 };
 
+/**
+ * Standort für Karte und Routenplanung. Grundlage ist ausschließlich die
+ * bestätigte Firmenanschrift (company.address) plus der Firmenname; der
+ * Google-Unternehmensprofil-Link wurde vom Inhaber aus dem verwalteten
+ * Google-Profil geteilt. Es wird kein Standort und keine Koordinate erfunden.
+ * Alle Google-URLs sind reine Links bzw. der Iframe-Inhalt, der erst nach
+ * aktivem Klick geladen wird (siehe components/location/MapEmbed.tsx).
+ */
+const mapQuery = `${company.name}, ${company.address}`;
+export const location = {
+  /** Vom Inhaber geteilter Link zum Google-Unternehmensprofil. */
+  profileUrl: "https://share.google/SumfJis4vDDqXeaZU",
+  /** Google-Maps-Routenplaner mit dem Firmenstandort als Ziel. */
+  routeUrl: `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(mapQuery)}`,
+  /** Einbettbare Karte (ohne API-Key) — wird erst nach Klick geladen. */
+  embedUrl: `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed&hl=de`,
+};
+
 export const social = {
   instagramHandle: "@n4n2_elektrotechnik",
 };
 
-export const trustMarkers = [
-  "Meisterbetrieb",
-  "[Festpreis-Garantie]",
-  "[Notdienst]",
-];
+// Nur bestätigte Aussagen. Kein Notdienst und keine Festpreis-Garantie
+// (Inhaber-Vorgabe) — bei Bedarf erst nach ausdrücklicher Bestätigung ergänzen.
+export const trustMarkers = ["Meisterbetrieb"];
 
 export type Service = {
   slug: string;
@@ -143,9 +160,9 @@ export const services: Service[] = [
   {
     slug: "kundendienst",
     title: "Kundendienst",
-    short: "Ansprechbar bei Störungen und Prüfterminen.",
+    short: "Ansprechpartner für Ihre elektrische Anlage.",
     description:
-      "Ob akute Störung oder wiederkehrende Prüfung: Wir sind Ansprechpartner für die laufende Betreuung Ihrer elektrischen Anlage.",
+      "Wir sind Ansprechpartner für die laufende Betreuung Ihrer elektrischen Anlage, zum Beispiel bei wiederkehrenden Prüfungen.",
     icon: "support",
   },
 ];

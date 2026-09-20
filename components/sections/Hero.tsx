@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { company, trustMarkers } from "@/lib/placeholder-data";
 
 export function Hero() {
@@ -28,12 +29,12 @@ export function Hero() {
         </p>
 
         <div className="mt-4 flex flex-wrap items-center gap-4 sm:mt-7">
-          <a
-            href="#kontakt"
+          <Link
+            href="/kontakt"
             className="rounded-full bg-gold px-7 py-3.5 font-mono text-sm font-medium uppercase tracking-[0.12em] text-navy-strong transition-colors hover:bg-gold-strong"
           >
             Projekt anfragen
-          </a>
+          </Link>
           <a
             href="#leistungen"
             className="rounded-full border border-paper/25 px-7 py-3.5 font-mono text-sm font-medium uppercase tracking-[0.12em] text-paper transition-colors hover:border-gold hover:text-gold"

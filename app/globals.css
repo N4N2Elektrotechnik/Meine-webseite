@@ -45,6 +45,10 @@
 
 html {
   scroll-behavior: smooth;
+  /* Reserviert die Scrollbar-Spur dauerhaft: beim Öffnen des Menüs
+     (body overflow: hidden) springt das Layout dadurch nicht, und
+     ResizeObserver/ScrollTrigger sehen keine Breitenänderung. */
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -83,6 +87,259 @@ p {
   box-shadow:
     0 0 0 6px var(--color-gold-soft),
     0 0 16px 3px rgba(251, 180, 0, 0.45);
+}
+
+/* ------------------------------------------------------------------
+   CableTrail (Unterseiten) — Kabel, Funke und Ankerpunkte.
+   Bewusst ohne filter/backdrop-filter: nur Striche, transform und
+   opacity, damit das Scrollen flüssig bleibt.
+   z-Ebenen: Linie 3 < Punkte 4 < Funke 6 (unter Header z-50).
+   ------------------------------------------------------------------ */
+.trail-svg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 3;
+}
+.trail-base {
+  stroke: rgb(20 57 126 / 0.28);
+  stroke-width: 2;
+}
+.trail-draw {
+  stroke: var(--color-gold-strong);
+  stroke-width: 3;
+  visibility: hidden;
+}
+.trail-halo {
+  stroke: var(--color-gold);
+  stroke-width: 9;
+  opacity: 0.16;
+  visibility: hidden;
+}
+[data-trail-tone="dark"] .trail-base {
+  stroke: rgb(245 246 249 / 0.16);
+}
+[data-trail-tone="dark"] .trail-draw {
+  stroke: var(--color-gold);
+}
+.trail-spark {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 6;
+  width: 10px;
+  height: 10px;
+  border-radius: 9999px;
+  background: var(--color-spark);
+  box-shadow:
+    0 0 0 3px rgb(251 180 0 / 0.9),
+    0 0 16px 5px rgb(251 180 0 / 0.45);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  will-change: transform;
+}
+[data-lite="true"] .trail-halo {
+  display: none;
+}
+[data-lite="true"] .trail-spark {
+  box-shadow: 0 0 0 3px rgb(251 180 0 / 0.9);
+}
+
+.trail-dot {
+  position: absolute;
+  z-index: 4;
+  width: 12px;
+  height: 12px;
+  border-radius: 9999px;
+  background: var(--color-gold);
+  opacity: 0.6;
+  transition: opacity 0.35s ease;
+}
+.trail-dot::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: inherit;
+  background: var(--color-navy-strong);
+}
+.trail-dot::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: inherit;
+  border: 2px solid var(--color-gold);
+  opacity: 0;
+  transform: scale(0.5);
+  transition:
+    opacity 0.4s ease,
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.trail-dot[data-trail-active="true"] {
+  opacity: 1;
+}
+.trail-dot[data-trail-active="true"]::after {
+  opacity: 0.55;
+  transform: none;
+}
+.trail-dot--terminal {
+  width: 16px;
+  height: 16px;
+}
+.trail-dot--terminal::before {
+  inset: 4px;
+}
+.trail-dot--terminal::after {
+  inset: -8px;
+}
+
+/* ------------------------------------------------------------------
+   Hamburger-Button + Menü-Overlay. Reine CSS-Transitions
+   (transform/opacity), kein JavaScript-Animationscode.
+   ------------------------------------------------------------------ */
+.burger__line {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 20px;
+  height: 2px;
+  margin: -1px 0 0 -10px;
+  border-radius: 2px;
+  background: var(--color-paper);
+  transition:
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.2s ease,
+    background-color 0.25s ease;
+}
+.burger__line:nth-child(1) {
+  transform: translateY(-7px);
+}
+.burger__line:nth-child(3) {
+  transform: translateY(7px);
+}
+.burger[aria-expanded="true"] .burger__line {
+  background: var(--color-gold);
+}
+.burger[aria-expanded="true"] .burger__line:nth-child(1) {
+  transform: rotate(45deg);
+}
+.burger[aria-expanded="true"] .burger__line:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+.burger[aria-expanded="true"] .burger__line:nth-child(3) {
+  transform: rotate(-45deg);
+}
+@media (hover: hover) {
+  .burger:hover .burger__line {
+    background: var(--color-gold);
+  }
+}
+
+/* visibility statt nur opacity: geschlossenes Menü ist weder sichtbar
+   noch fokussierbar und erzeugt keine Compositing-Ebene. */
+.menu-overlay {
+  visibility: hidden;
+  opacity: 0;
+  transition:
+    opacity 0.3s ease,
+    visibility 0s linear 0.3s;
+}
+.menu-overlay[data-open="true"] {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+.menu-panel {
+  transform: translate3d(0, -1rem, 0);
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.menu-overlay[data-open="true"] .menu-panel {
+  transform: none;
+}
+
+/* Menüeinträge: Text rückt nach rechts, goldene Linie baut sich links auf,
+   eine Unterstreichung läuft von links nach rechts durch. Nur transform +
+   Farbe; Hover nur auf Geräten mit echtem Hover, Fokus/aktive Seite immer. */
+.nav-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 1.25rem;
+  border-bottom: 1px solid rgb(245 246 249 / 0.1);
+  color: var(--color-paper);
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.nav-link__label {
+  position: relative;
+  display: inline-block;
+  transition:
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    color 0.3s ease;
+}
+.nav-link__tick {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 1.25rem;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--color-gold);
+  transform: translateY(-50%) scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.nav-link__rule {
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-gold), var(--color-gold-strong) 55%, transparent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.nav-link__num {
+  transition: color 0.3s ease;
+}
+:is(.nav-link:focus-visible, .nav-link[aria-current="page"]) .nav-link__label,
+.nav-link:active .nav-link__label {
+  color: var(--color-gold);
+}
+:is(.nav-link:focus-visible, .nav-link[aria-current="page"]) .nav-link__label {
+  transform: translateX(2rem);
+}
+:is(.nav-link:focus-visible, .nav-link[aria-current="page"]) .nav-link__tick {
+  transform: translateY(-50%) scaleX(1);
+}
+:is(.nav-link:focus-visible, .nav-link[aria-current="page"]) .nav-link__num {
+  color: var(--color-gold);
+}
+.nav-link:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: -2px;
+  border-radius: 0.5rem;
+}
+.nav-link:focus-visible .nav-link__rule {
+  transform: scaleX(1);
+}
+@media (hover: hover) {
+  .nav-link:hover .nav-link__label {
+    color: var(--color-gold);
+    transform: translateX(2rem);
+  }
+  .nav-link:hover .nav-link__tick {
+    transform: translateY(-50%) scaleX(1);
+  }
+  .nav-link:hover .nav-link__rule {
+    transform: scaleX(1);
+  }
+  .nav-link:hover .nav-link__num {
+    color: var(--color-gold);
+  }
 }
 
 /* Sternebewertung im Bewertungsformular — reine CSS-Lösung (radio + label),

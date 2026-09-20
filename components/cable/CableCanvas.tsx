@@ -14,8 +14,9 @@ gsap.registerPlugin(ScrollTrigger);
  *
  * Kernidee: Nicht der rohe Scroll-Fortschritt (0–1 über die ganze Seite)
  * bestimmt die Position des Funkens, sondern die tatsächliche Dokument-
- * Y-Position der Viewport-Mitte. Dafür wird per Bisektion der Punkt auf
- * dem Pfad gesucht, dessen Y-Koordinate der Viewport-Mitte entspricht
+ * Y-Position der Viewport-Mitte. Dafür wird per Lookup-Tabelle der Punkt auf
+ * dem Pfad gesucht (einmal berechnete Tabelle + Binärsuche pro Frame),
+ * dessen Y-Koordinate der Viewport-Mitte entspricht
  * (Pfad ist von Natur aus Y-monoton, da Knoten von oben nach unten
  * angeordnet sind). Dadurch bleibt der Funke immer ungefähr vertikal
  * zentriert im sichtbaren Bereich, statt bei langem Restscroll (z. B.
@@ -54,7 +55,20 @@ export function CableCanvas() {
     let totalLength = 0;
     let pathStartY = 0;
     let pathEndY = 0;
+    // Lookup-Tabelle des Pfads (Y → Länge/X), einmal in build() berechnet.
+    // Ersetzt die frühere Bisektion mit ~15 getPointAtLength()-Aufrufen pro
+    // Scroll-Frame — die waren auf schwachen Geräten die Hauptursache für
+    // Ruckeln (jeder Aufruf misst den Pfad neu durch).
+    let tableX = new Float32Array(0);
+    let tableY = new Float32Array(0);
+    let tableL = new Float32Array(0);
+    let foundLen = 0;
+    let foundX = 0;
+    let foundY = 0;
     let st: ScrollTrigger | undefined;
+    // Im Scroll-Handler wiederverwendete Knotenliste — nicht bei jedem
+    // Scroll-Frame per querySelectorAll neu ermitteln (siehe update()).
+    let cachedNodes: HTMLElement[] = [];
 
     function getNodes() {
       return Array.from(
@@ -64,6 +78,7 @@ export function CableCanvas() {
 
     function build() {
       const nodes = getNodes();
+      cachedNodes = nodes;
       if (nodes.length < 2) return;
 
       const containerRect = container!.getBoundingClientRect();
@@ -101,6 +116,18 @@ export function CableCanvas() {
       totalLength = drawPath!.getTotalLength();
       pathStartY = points[0].y;
       pathEndY = points[points.length - 1].y;
+      const step = Math.max(6, totalLength / 1500);
+      const count = Math.ceil(totalLength / step) + 1;
+      tableX = new Float32Array(count);
+      tableY = new Float32Array(count);
+      tableL = new Float32Array(count);
+      for (let i = 0; i < count; i++) {
+        const len = Math.min(i * step, totalLength);
+        const p = drawPath!.getPointAtLength(len);
+        tableX[i] = p.x;
+        tableY[i] = p.y;
+        tableL[i] = len;
+      }
 
       // Kumulierte Pfadlänge je Ankerpunkt, um Knoten exakt beim
       // Erreichen durch das gezeichnete Kabel zu aktivieren.
@@ -129,19 +156,29 @@ export function CableCanvas() {
       }
     }
 
-    // Bisektion: findet die Pfadlänge, an der die Y-Koordinate ungefähr
-    // targetY erreicht. Der Pfad ist Y-monoton (Knoten liegen von oben
-    // nach unten), daher funktioniert die einfache Intervallhalbierung.
-    function lengthAtY(targetY: number): number {
+    // Binärsuche über die Lookup-Tabelle: Pfadlänge (foundLen) und Punkt
+    // (foundX/foundY), an dem die Y-Koordinate targetY erreicht. Der Pfad
+    // ist Y-monoton (Knoten liegen von oben nach unten), daher genügt eine
+    // Suche im Array — ohne DOM-Aufruf.
+    function locate(targetY: number) {
       let lo = 0;
-      let hi = totalLength;
-      for (let i = 0; i < 22; i++) {
-        const mid = (lo + hi) / 2;
-        const y = drawPath!.getPointAtLength(mid).y;
-        if (y < targetY) lo = mid;
+      let hi = tableY.length - 1;
+      while (lo < hi) {
+        const mid = (lo + hi) >> 1;
+        if (tableY[mid] < targetY) lo = mid + 1;
         else hi = mid;
       }
-      return (lo + hi) / 2;
+      if (lo === 0) {
+        foundLen = tableL[0];
+        foundX = tableX[0];
+        foundY = tableY[0];
+        return;
+      }
+      const span = tableY[lo] - tableY[lo - 1];
+      const t = span > 0 ? (targetY - tableY[lo - 1]) / span : 1;
+      foundLen = tableL[lo - 1] + (tableL[lo] - tableL[lo - 1]) * t;
+      foundX = tableX[lo - 1] + (tableX[lo] - tableX[lo - 1]) * t;
+      foundY = targetY;
     }
 
     function update() {
@@ -152,25 +189,30 @@ export function CableCanvas() {
       // wie der Pfad (relativ zur linken/oberen Ecke von <main>).
       const anchorDocY = -containerRect.top + window.innerHeight * VIEWPORT_ANCHOR;
 
+      const last = tableY.length - 1;
       let targetLength: number;
       if (anchorDocY <= pathStartY) {
         targetLength = 0;
+        foundX = tableX[0];
+        foundY = tableY[0];
       } else if (anchorDocY >= pathEndY) {
         targetLength = totalLength;
+        foundX = tableX[last];
+        foundY = tableY[last];
       } else {
-        targetLength = lengthAtY(anchorDocY);
+        locate(anchorDocY);
+        targetLength = foundLen;
       }
 
       drawPath!.style.strokeDashoffset = `${totalLength - targetLength}`;
 
       if (spark) {
-        const point = drawPath!.getPointAtLength(targetLength);
-        spark.setAttribute("cx", String(point.x));
-        spark.setAttribute("cy", String(point.y));
+        spark.setAttribute("cx", String(foundX));
+        spark.setAttribute("cy", String(foundY));
         spark.style.opacity = targetLength > 0.5 ? "1" : "0";
       }
 
-      getNodes().forEach((node, i) => {
+      cachedNodes.forEach((node, i) => {
         const threshold = cumulativeLengths[i] ?? Infinity;
         const isActive = targetLength >= threshold - 4;
         const wasActive = node.dataset.cableActive === "true";

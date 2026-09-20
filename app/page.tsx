@@ -7,22 +7,16 @@ import { Contact } from "@/components/sections/Contact";
 import { Reviews } from "@/components/sections/Reviews";
 import { CableCanvas } from "@/components/cable/CableCanvas";
 
-export default async function Home({
-  searchParams,
-}: {
-  searchParams: Promise<{ contact?: string; review?: string }>;
-}) {
-  const sp = await searchParams;
-
+export default function Home() {
   return (
     <>
       <Header />
       <main className="relative">
         <Hero />
-        <About />
+        <About variant="teaser" />
         <Services />
-        <Contact status={sp.contact} />
-        <Reviews status={sp.review} />
+        <Contact variant="teaser" />
+        <Reviews variant="teaser" />
         <CableCanvas />
       </main>
       <Footer />

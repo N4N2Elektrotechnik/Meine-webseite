@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import { Big_Shoulders, Geist, Geist_Mono } from "next/font/google";
-import { ConsentBanner } from "@/components/consent/ConsentBanner";
-import { Analytics } from "@/components/consent/Analytics";
 import "./globals.css";
 
 const display = Big_Shoulders({
@@ -24,7 +22,7 @@ const mono = Geist_Mono({
 export const metadata: Metadata = {
   title: "N4N2 Elektrotechnik",
   description:
-    "Ist die Spannung mal entzwei – N4N2 kommt vorbei! Elektrotechnik mit Präzision. (Weitere Inhalte folgen in späteren Phasen.)",
+    "N4N2 Elektrotechnik – Meisterbetrieb für Elektrotechnik in München und Umgebung.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -36,8 +34,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body>
         {children}
-        <ConsentBanner />
-        <Analytics />
       </body>
     </html>
   );
