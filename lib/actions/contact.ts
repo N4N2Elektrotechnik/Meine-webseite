@@ -5,7 +5,10 @@ import { Resend } from "resend";
 import { createClient } from "@/utils/supabase/server";
 
 const DEFAULT_MAIL_TO = "info@n4n2-elektrotechnik.de";
-const DEFAULT_MAIL_FROM = "N4N2 Elektrotechnik <onboarding@resend.dev>";
+// Muss auf der bei Resend verifizierten Domain liegen. onboarding@resend.dev
+// darf nur an die Adresse des Resend-Kontoinhabers senden und wird sonst von
+// der API abgelehnt.
+const DEFAULT_MAIL_FROM = "N4N2 Elektrotechnik <kontakt@n4n2-elektrotechnik.de>";
 
 /**
  * Benachrichtigt info@n4n2-elektrotechnik.de per E-Mail über eine neue
