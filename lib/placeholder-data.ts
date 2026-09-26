@@ -90,7 +90,7 @@ export const services: Service[] = [
     title: "Elektroinstallationen",
     short: "Neubau und Umbau, sauber geplant.",
     description:
-      "Von der ersten Leitung bis zum Zählerschrank: Elektroinstallationen für Neubau, Umbau und Erweiterung — geplant und dokumentiert nach aktuellem Regelwerk.",
+      "Von der ersten Leitung bis zum Zählerschrank: Wir übernehmen alle Elektroarbeiten rund um Ihre Hausinstallation — fachgerechte Elektroinstallationen für Neubau, Umbau und Erweiterung bestehender elektrischer Anlagen, geplant, verkabelt und dokumentiert nach aktuellem Regelwerk der Elektrotechnik.",
     icon: "plug",
   },
   {
@@ -98,7 +98,7 @@ export const services: Service[] = [
     title: "Altbau- und Wohnungssanierung",
     short: "Bestehende Anlagen behutsam modernisieren.",
     description:
-      "Veraltete Sicherungskästen, alte Leitungswege, fehlende Schutzeinrichtungen: Wir modernisieren Elektroanlagen in bewohnten Altbauten mit möglichst wenig Eingriff in Wände und Alltag.",
+      "Veraltete Sicherungskästen, alte Leitungswege, fehlende Schutztechnik: Bei der Altbausanierung, Elektrosanierung und Wohnungssanierung modernisieren wir bestehende elektrische Anlagen in Altbauten, Wohnungen und Häusern — mit möglichst wenig Eingriff in Wände, Böden und Alltag.",
     icon: "renovate",
   },
   {
@@ -106,7 +106,7 @@ export const services: Service[] = [
     title: "Fehlersuche und Reparaturen",
     short: "Ursache finden statt nur Symptome beheben.",
     description:
-      "Sicherung fliegt raus, Steckdose ohne Strom, Leitung defekt: Wir grenzen die Fehlerquelle systematisch ein und reparieren gezielt statt auf Verdacht.",
+      "Sicherung fliegt immer wieder raus, Steckdose ohne Strom, Leitung defekt oder plötzlicher Stromausfall: Bei der Elektro-Fehlersuche grenzen wir elektrische Fehler in Ihrer Elektroinstallation systematisch ein und beheben die Fehlerquelle mit der passenden Elektroreparatur — gezielt statt auf Verdacht.",
     icon: "diagnose",
   },
   {
@@ -114,7 +114,7 @@ export const services: Service[] = [
     title: "Beleuchtung und Lichttechnik",
     short: "Lichtplanung für Wohnen und Gewerbe.",
     description:
-      "Von der Wohnraumbeleuchtung bis zur Gewerbefläche: Lichttechnik, die auf die tatsächliche Nutzung des Raums abgestimmt ist, inklusive Umstieg auf LED.",
+      "Von der Wohnraumbeleuchtung bis zur Gewerbebeleuchtung: Wir planen Innenbeleuchtung und Außenbeleuchtung passend zur tatsächlichen Nutzung des Raums — von einzelnen Leuchten bis zum kompletten Beleuchtungskonzept, inklusive Umstieg auf energiesparende LED-Beleuchtung.",
     icon: "light",
   },
   {
@@ -122,7 +122,7 @@ export const services: Service[] = [
     title: "Smart Home / KNX",
     short: "Licht, Heizung und Sicherheit vernetzt steuern.",
     description:
-      "Planung und Installation von KNX- und Smart-Home-Systemen — von einzelnen Lichtszenen bis zur vernetzten Haussteuerung, abgestimmt auf den Alltag der Bewohner.",
+      "Planung und Installation von KNX- und Smart-Home-Systemen für die Gebäude- und Hausautomation — von einzelnen Lichtszenen und Lichtsteuerung bis zur vernetzten Haustechnik für Heizungssteuerung und Sicherheit, abgestimmt auf den Alltag der Bewohner und ausgelegt als intelligente Haussteuerung aus einer Hand.",
     icon: "smarthome",
   },
   {
@@ -130,7 +130,7 @@ export const services: Service[] = [
     title: "Netzwerk- und Datentechnik",
     short: "Verkabelung für Daten, LAN und WLAN.",
     description:
-      "Strukturierte Netzwerkverkabelung, Datendosen und WLAN-Access-Points — die technische Grundlage für ein Zuhause oder Büro mit stabiler Verbindung.",
+      "Strukturierte Netzwerkverkabelung, Datendosen und WLAN-Access-Points: Wir übernehmen die Netzwerktechnik und Datentechnik für Ihr Zuhause oder Büro — von der Datenverkabelung für LAN bis zum stabilen WLAN für ein zuverlässiges Heimnetzwerk.",
     icon: "network",
   },
   {
@@ -138,7 +138,7 @@ export const services: Service[] = [
     title: "Wallbox / Elektromobilität",
     short: "Laden zuhause, elektrotechnisch sauber angebunden.",
     description:
-      "Installation von Wallboxen inklusive Prüfung des Hausanschlusses und Lastmanagement, damit das Laden des Fahrzeugs die übrige Anlage nicht überlastet.",
+      "Installation von Wallboxen für das Laden von Elektroautos (E-Autos) und Elektrofahrzeugen zuhause: Wir prüfen den Hausanschluss, planen das Lastmanagement und schaffen so eine zuverlässige Ladeinfrastruktur für Ihre Elektromobilität — ohne dass die Ladestation die übrige elektrische Anlage überlastet.",
     icon: "wallbox",
   },
   {
@@ -146,7 +146,7 @@ export const services: Service[] = [
     title: "Photovoltaik / elektrische Einbindung",
     short: "Elektrotechnische Anbindung Ihrer PV-Anlage.",
     description:
-      "Elektrotechnische Einbindung von Photovoltaikanlagen in die Hausinstallation — von der Zählerplatz-Abstimmung bis zur fachgerechten Verkabelung.",
+      "Elektrotechnische Einbindung Ihrer Photovoltaikanlage (PV-Anlage / Solaranlage) in die Hausinstallation: von der Abstimmung des Zählerplatzes bis zur fachgerechten Verkabelung, damit der erzeugte Solarstrom sicher in Ihr Hausnetz eingespeist wird.",
     icon: "solar",
   },
   {
@@ -154,7 +154,7 @@ export const services: Service[] = [
     title: "Verteiler- und Sicherungstechnik",
     short: "Der Schaltschrank als sichere Basis.",
     description:
-      "Austausch und Erweiterung von Zählerschränken und Unterverteilungen — übersichtlich aufgebaut und mit zeitgemäßer Schutztechnik ausgestattet.",
+      "Austausch und Erweiterung von Zählerschränken, Sicherungskästen und Unterverteilungen: Wir bringen die Verteiler- und Sicherungstechnik Ihrer elektrischen Anlage übersichtlich und zeitgemäß auf den aktuellen Stand — inklusive moderner Schutztechnik wie FI-Schutzschaltern.",
     icon: "distribution",
   },
   {
@@ -162,7 +162,7 @@ export const services: Service[] = [
     title: "Kundendienst",
     short: "Ansprechpartner für Ihre elektrische Anlage.",
     description:
-      "Wir sind Ansprechpartner für die laufende Betreuung Ihrer elektrischen Anlage, zum Beispiel bei wiederkehrenden Prüfungen.",
+      "Als Elektroservice und Kundendienst sind wir auch nach der Installation Ihr Ansprechpartner für die laufende Betreuung elektrischer Anlagen — von Wartung und wiederkehrenden Prüfungen bis zu kleineren Erweiterungen und Reparaturen im laufenden Betrieb.",
     icon: "support",
   },
 ];
