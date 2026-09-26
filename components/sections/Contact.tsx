@@ -111,6 +111,10 @@ export function Contact({
                 <dt className="w-32 flex-none text-paper/45">Adresse</dt>
                 <dd>{company.address}</dd>
               </div>
+              <div className="flex gap-3">
+                <dt className="w-32 flex-none text-paper/45">Erreichbar</dt>
+                <dd>Mo–Sa, 8:00–18:00 Uhr</dd>
+              </div>
             </dl>
           ) : (
             <Link
