@@ -76,8 +76,13 @@ export function Header() {
     // Backdrop-Blur wird beim Scrollen in jedem Frame neu berechnet und
     // macht den Header zum Containing Block für `position: fixed` — das
     // Menü-Overlay wäre dadurch nur so groß wie der Header (abgeschnitten).
-    <header className="sticky top-0 z-[65] border-b border-paper/10 bg-navy-strong/95">
-      <div className="relative z-[80] mx-auto flex max-w-6xl items-center justify-between px-6 py-4 sm:px-10">
+    //
+    // Die weiße Fläche sitzt auf der Leiste selbst (z-80, über dem
+    // Overlay) statt am <header>: So bleibt die Leiste auch bei offenem
+    // Menü weiß, während das Menü-Panel darunter blau bleibt.
+    <header className="sticky top-0 z-[65]">
+      <div className="relative z-[80] border-b border-line bg-surface">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4 sm:px-10">
         <Link
           href="/"
           aria-label="Zum Seitenanfang"
@@ -90,9 +95,9 @@ export function Header() {
           <a
             href={contactLinks.tel}
             aria-label={`${company.name} anrufen: ${company.phone}`}
-            className="flex items-center gap-2 text-paper/80 transition-colors hover:text-gold"
+            className="group flex items-center gap-2 text-navy"
           >
-            <PhoneIcon className="h-5 w-5 flex-none" />
+            <PhoneIcon className="h-5 w-5 flex-none transition-colors group-hover:text-gold-strong" />
             <span className="hidden font-mono text-sm sm:inline">{company.phone}</span>
           </a>
           <Link
@@ -110,13 +115,14 @@ export function Header() {
             aria-expanded={isMenuOpen}
             aria-controls="hauptnavigation-panel"
             onClick={() => setIsMenuOpen((open) => !open)}
-            className="burger relative h-11 w-11 flex-none rounded-full border border-paper/15 transition-colors duration-300 hover:border-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold aria-expanded:border-gold/60 aria-expanded:bg-gold/10"
+            className="burger relative h-11 w-11 flex-none rounded-full border border-navy/20 transition-colors duration-300 hover:border-gold hover:bg-gold/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy aria-expanded:border-gold aria-expanded:bg-gold/15"
           >
             <span aria-hidden="true" className="burger__line" />
             <span aria-hidden="true" className="burger__line" />
             <span aria-hidden="true" className="burger__line" />
           </button>
         </div>
+      </div>
       </div>
 
       {/* Overlay-Menü — deckt bei Öffnung den gesamten Viewport ab. Im

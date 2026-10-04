@@ -5,6 +5,13 @@ import { TrailDot } from "@/components/cable/TrailDot";
 import { LocationSection } from "@/components/location/LocationSection";
 import { ChatIcon, InstagramIcon, MailIcon, PhoneIcon } from "@/components/icons/ContactIcons";
 import { submitContactMessage } from "@/lib/actions/contact";
+import { ContactImageInput } from "@/components/sections/ContactImageInput";
+import {
+  MAX_IMAGE_BYTES,
+  MAX_IMAGES,
+  MAX_TOTAL_IMAGE_BYTES,
+  formatMegabytes,
+} from "@/lib/contact-images";
 
 const fields = [
   { id: "name", label: "Name", type: "text", autoComplete: "name" },
@@ -156,6 +163,15 @@ export function Contact({
                 Ihre Angaben und versuchen Sie es erneut.
               </p>
             ) : null}
+            {status === "images" ? (
+              <p className="mb-6 rounded-lg border border-red-400/40 bg-red-400/10 px-4 py-3 text-sm text-red-200">
+                Ihre Bilder konnten nicht angenommen werden. Erlaubt sind bis
+                zu {MAX_IMAGES} Bilder (JPG, PNG, WEBP, HEIC), je max.{" "}
+                {formatMegabytes(MAX_IMAGE_BYTES)} und zusammen max.{" "}
+                {formatMegabytes(MAX_TOTAL_IMAGE_BYTES)}. Bitte wählen Sie die
+                Bilder erneut aus und senden Sie die Nachricht noch einmal.
+              </p>
+            ) : null}
             <div className="grid gap-6 sm:grid-cols-2">
               {fields.map((field) => (
                 <div
@@ -194,6 +210,8 @@ export function Contact({
                   className="mt-2 w-full resize-none rounded-lg border border-paper/15 bg-navy-soft/40 px-4 py-3 text-paper placeholder:text-paper/30 focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
                 />
               </div>
+
+              <ContactImageInput />
             </div>
 
             <label className="mt-6 flex items-start gap-3 text-sm text-paper/70">

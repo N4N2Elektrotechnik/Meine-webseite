@@ -204,20 +204,18 @@ p {
   height: 2px;
   margin: -1px 0 0 -10px;
   border-radius: 2px;
-  background: var(--color-paper);
+  /* Immer Navy: der Button sitzt auf der weißen Kopfleiste, Gold wäre
+     dort zu kontrastarm. Hover/offen zeigt der Button-Rahmen (Header.tsx). */
+  background: var(--color-navy);
   transition:
     transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.2s ease,
-    background-color 0.25s ease;
+    opacity 0.2s ease;
 }
 .burger__line:nth-child(1) {
   transform: translateY(-7px);
 }
 .burger__line:nth-child(3) {
   transform: translateY(7px);
-}
-.burger[aria-expanded="true"] .burger__line {
-  background: var(--color-gold);
 }
 .burger[aria-expanded="true"] .burger__line:nth-child(1) {
   transform: rotate(45deg);
@@ -228,11 +226,6 @@ p {
 }
 .burger[aria-expanded="true"] .burger__line:nth-child(3) {
   transform: rotate(-45deg);
-}
-@media (hover: hover) {
-  .burger:hover .burger__line {
-    background: var(--color-gold);
-  }
 }
 
 /* visibility statt nur opacity: geschlossenes Menü ist weder sichtbar

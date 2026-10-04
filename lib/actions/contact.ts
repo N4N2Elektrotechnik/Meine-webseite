@@ -3,6 +3,73 @@
 import { redirect } from "next/navigation";
 import { Resend } from "resend";
 import { createClient } from "@/utils/supabase/server";
+import { MAX_IMAGE_BYTES, MAX_IMAGES, MAX_TOTAL_IMAGE_BYTES } from "@/lib/contact-images";
+
+type ImageAttachment = { filename: string; content: Buffer; contentType: string };
+
+const HEIF_BRANDS = new Set(["heic", "heix", "heim", "heis", "hevc", "hevx", "mif1", "msf1", "heif"]);
+
+/**
+ * Bestimmt den Bildtyp anhand der ersten Bytes (Signatur) statt über
+ * Dateiname/MIME-Typ — beides kann der Absender frei wählen.
+ */
+function detectImageType(bytes: Buffer): { contentType: string; extension: string } | null {
+  if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
+    return { contentType: "image/jpeg", extension: "jpg" };
+  }
+  if (bytes.length >= 8 && bytes.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) {
+    return { contentType: "image/png", extension: "png" };
+  }
+  if (bytes.length >= 12 && bytes.toString("ascii", 0, 4) === "RIFF" && bytes.toString("ascii", 8, 12) === "WEBP") {
+    return { contentType: "image/webp", extension: "webp" };
+  }
+  if (bytes.length >= 12 && bytes.toString("ascii", 4, 8) === "ftyp") {
+    const brand = bytes.toString("ascii", 8, 12);
+    if (HEIF_BRANDS.has(brand)) {
+      return brand.startsWith("he") && brand !== "heif"
+        ? { contentType: "image/heic", extension: "heic" }
+        : { contentType: "image/heif", extension: "heif" };
+    }
+  }
+  return null;
+}
+
+/**
+ * Liest und prüft die optionalen Bildanhänge. Gibt `null` zurück, sobald
+ * eine Regel verletzt ist (Anzahl, Größe, Typ) — die Anfrage wird dann
+ * nicht gespeichert, damit der Kunde sie mit passenden Bildern erneut
+ * senden kann.
+ */
+async function readImageAttachments(formData: FormData): Promise<ImageAttachment[] | null> {
+  // Ein leeres Dateifeld sendet je nach Browser eine leere, namenlose Datei.
+  const files = formData
+    .getAll("images")
+    .filter((entry): entry is File => typeof entry !== "string" && entry.size > 0);
+
+  if (files.length > MAX_IMAGES) return null;
+  const total = files.reduce((sum, file) => sum + file.size, 0);
+  if (total > MAX_TOTAL_IMAGE_BYTES) return null;
+
+  const attachments: ImageAttachment[] = [];
+  for (const [index, file] of files.entries()) {
+    if (file.size > MAX_IMAGE_BYTES) return null;
+    const content = Buffer.from(await file.arrayBuffer());
+    const type = detectImageType(content);
+    if (!type) return null;
+
+    // Nur unkritische Zeichen im Dateinamen, Endung passend zum echten Typ.
+    const baseName = file.name
+      .replace(/\.[^.]*$/, "")
+      .replace(/[^\w-]+/g, "_")
+      .slice(0, 60);
+    attachments.push({
+      filename: `${baseName || `bild-${index + 1}`}.${type.extension}`,
+      content,
+      contentType: type.contentType,
+    });
+  }
+  return attachments;
+}
 
 const DEFAULT_MAIL_TO = "info@n4n2-elektrotechnik.de";
 // Muss auf der bei Resend verifizierten Domain liegen. onboarding@resend.dev
@@ -22,11 +89,13 @@ async function notifyContactMessage({
   email,
   phone,
   message,
+  images,
 }: {
   name: string;
   email: string;
   phone: string;
   message: string;
+  images: ImageAttachment[];
 }) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
@@ -45,10 +114,12 @@ async function notifyContactMessage({
         `Name: ${name}`,
         `E-Mail: ${email}`,
         `Telefon: ${phone || "-"}`,
+        `Bilder: ${images.length > 0 ? `${images.length} im Anhang` : "-"}`,
         "",
         "Nachricht:",
         message,
       ].join("\n"),
+      attachments: images.length > 0 ? images : undefined,
     });
 
     if (error) {
@@ -84,6 +155,11 @@ export async function submitContactMessage(formData: FormData) {
     redirect("/kontakt?contact=error");
   }
 
+  const images = await readImageAttachments(formData);
+  if (!images) {
+    redirect("/kontakt?contact=images");
+  }
+
   const supabase = await createClient();
   const { error } = await supabase.from("contact_messages").insert({
     name,
@@ -97,7 +173,9 @@ export async function submitContactMessage(formData: FormData) {
     redirect("/kontakt?contact=error");
   }
 
-  await notifyContactMessage({ name, email, phone, message });
+  // Bilder gehen nur per E-Mail-Anhang raus, Supabase speichert weiterhin
+  // nur den Text der Anfrage.
+  await notifyContactMessage({ name, email, phone, message, images });
 
   redirect("/kontakt?contact=success");
 }

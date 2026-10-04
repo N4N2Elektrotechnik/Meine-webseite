@@ -10,6 +10,12 @@ const nextConfig: NextConfig = {
     // meldete den Wert deshalb im Cache. Ohne Build-Cache entsteht dieser
     // Fundort gar nicht; die Builds werden lediglich etwas langsamer.
     turbopackFileSystemCacheForBuild: false,
+    serverActions: {
+      // Kontaktformular mit Bildanhängen: max. 4 MB Bilder
+      // (lib/contact-images.ts) plus Textfelder und Multipart-Overhead.
+      // Standard wären 1 MB.
+      bodySizeLimit: "5mb",
+    },
   },
 };
 
